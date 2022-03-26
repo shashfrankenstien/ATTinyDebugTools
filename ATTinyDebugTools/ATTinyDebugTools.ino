@@ -284,20 +284,14 @@
 //      1 = 0   Brown-out Detector trigger level bit 1
 //      0 = 1   Brown-out Detector trigger level bit 0
 
-#define DEVELOPER 0
+#define DEVELOPER 1
 
 #define PMODE    8    // Input - HIGH = Program Mode, LOW = Debug Mode
-#define VCC      9    // Target Pin 8 - Vcc
-#define RESET   10    // Target Pin 1 - RESET, or SCI
-#define MOSI    11    // Target Pin 5 - MOSI,  or SDI
-#define MISO    12    // Target Pin 6 - MISO,  or SII
+#define VCC     10    // Target Pin 8 - Vcc
 #define SCK     13    // Target Pin 7 - SCK,   or SDO
-
-// Alternate Pin Definitions for High Voltage Programmer (for future expansion)
-#define SCI     10    // Target Pin 2 - SCI
-#define SII     11    // Target Pin 6 - SII
-#define SDI     12    // Target Pin 5 - SDI
-#define SDO     13    // Target Pin 7 - SDO
+#define MISO    12    // Target Pin 6 - MISO,  or SII
+#define MOSI    11    // Target Pin 5 - MOSI,  or SDI
+#define RESET    6    // Target Pin 1 - This is the pin fuze resetter uses in it's charge pump, but when the pump is off, the circut taps into the pin for other stuffs
 
 boolean       progMode = false;
 boolean       debugWireOn = false;
@@ -2050,6 +2044,23 @@ void debugger () {
           }
           break;
 
+       case 'R':                                             // Disable debugWire Fuse
+          {
+            disableSpiPins();
+            PumpFuseResetter resetter = PumpFuseResetter();
+            if (resetter.reset()==0) {
+              println(F("HVP reset successful"));
+            } else {
+              println(F("HVP reset failed!"));
+              println(F("*Check switches*"));
+            }
+              
+            powerOff();
+            powerOn();
+            enableSpiPins();
+          }
+          break;
+
         default:
           printMenu();
           break;
@@ -2070,6 +2081,7 @@ void printMenu () {
   println(F(" 8 - Enable CKDIV8 (divide clock by 8)"));
   println(F(" 1 - Disable CKDIV8"));
   println(F(" B - Engage Debugger"));
+  println(F(" R - Reset Fuses (HVP)"));
 #if 0
   println(F(" E - Erase Flash & EEPROM"));
 #endif
@@ -2980,20 +2992,22 @@ void avrisp () {
 }
 
 
-void setup () {
+void setup() {
   pinMode(PMODE, INPUT);               // Mode Input
   digitalWrite(PMODE, HIGH);
+  analogReference(DEFAULT);
   delay(1);
   if (runMode = digitalRead(PMODE)) {
     selectProgrammer();
   } else {
     selectDebugger();
   }
+
 }
 
 
 
-void loop () {
+void loop() {
   boolean mode = digitalRead(PMODE);
   if (runMode != mode) {
     runMode = mode;
