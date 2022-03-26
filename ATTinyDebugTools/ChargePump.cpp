@@ -29,7 +29,7 @@ void _pump () {
     } else {
         pwrOn = 0;
         DDRD = GND;
-        PORTD = GND;        
+        PORTD = GND;
     }
 }
 

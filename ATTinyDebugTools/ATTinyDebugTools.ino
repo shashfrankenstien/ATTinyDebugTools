@@ -320,6 +320,12 @@ unsigned int  timeOutDelay;           // Timeout delay (based on baud rate)
 boolean       runMode;                // If HIGH Debug Mode, else Program
 boolean       reportTimeout = true;   // If true, report read timeout errors
 
+//variables to save Fuse settings
+byte          lowFuse_saved;
+byte          highFuse_saved;
+byte          extFuse_saved;
+boolean       fuseSaved = false;
+
 
 OnePinSerial  debugWire(RESET);
 
@@ -1957,6 +1963,7 @@ void debugger () {
             }
             if (newFuse != lowFuse) {
               ispSend(0xAC, 0xA0, 0x00, newFuse);
+              busyWait();
               print(F("CKDIV8 Fuse "));
               println(enable ? F("Enabled") : F("Disabled"));
             } else {
@@ -1986,6 +1993,7 @@ void debugger () {
             }
             if (newFuse != highFuse) {
               ispSend(0xAC, 0xA8, 0x00, newFuse);
+              busyWait();
               print(F("DWEN Fuse "));
               println(enable ? F("Enabled") : F("Disabled"));
             } else {
@@ -2044,7 +2052,77 @@ void debugger () {
           }
           break;
 
-       case 'R':                                             // Disable debugWire Fuse
+
+        case '<':                                             // Save current fuse settings
+          if (!hasDeviceInfo) {
+            identifyDevice();
+          }
+          if (hasDeviceInfo && enterProgramMode()) {
+            print(F("Low: "));
+            printHex8(lowFuse_saved = ispSend(0x50, 0x00, 0x00, 0x00));
+            busyWait();
+            print(F(", High: "));
+            printHex8(highFuse_saved = ispSend(0x58, 0x08, 0x00, 0x00));
+            busyWait();
+            print(F(", Ext: "));
+            printHex8(extFuse_saved = ispSend(0x50, 0x08, 0x00, 0x00));
+            busyWait();
+            fuseSaved = true;
+            println();
+            println(F("Fuses saved"));
+          }
+          break;
+
+
+        case '>':                                             // restore fuse settings
+          if (fuseSaved) {
+            if (!hasDeviceInfo) {
+              identifyDevice();
+            }
+            if (hasDeviceInfo && enterProgramMode()) {
+              print(F("Low: "));
+              ispSend(0xAC, 0xA0, 0x00, lowFuse_saved);    //    0xAC 0xA0 0x00 <val>  Writes <val> into ATTiny85 Low Fuses byte
+              busyWait();
+              printHex8(ispSend(0x50, 0x00, 0x00, 0x00));
+
+              print(F(", High: "));
+              ispSend(0xAC, 0xA8, 0x00, highFuse_saved);               //    0xAC 0xA8 0x00 <val>  Writes <val> into ATTiny85 High Fuses byte
+              busyWait();
+              printHex8(ispSend(0x58, 0x08, 0x00, 0x00));
+
+              print(F(", Ext: "));
+              ispSend(0xAC, 0xA4, 0x00, extFuse_saved);    //    0xAC 0xA4 0x00 <val>  Writes <val> into ATTiny85 Extended Fuses byte
+              busyWait();
+              printHex8(ispSend(0x50, 0x08, 0x00, 0x00));
+              println();
+              println(F("Fuses restored"));
+            }
+          } else {
+            println(F("Fuses are not saved"));
+          }
+          break;
+
+
+       case 'R':                                             // restore saved Fuses (HVP)
+          if (fuseSaved) {
+            disableSpiPins();
+            PumpFuseResetter resetter = PumpFuseResetter();
+            if (resetter.restore(lowFuse_saved, highFuse_saved, extFuse_saved)==0) {
+              println(F("HVP restore successful"));
+            } else {
+              println(F("HVP restore failed!"));
+              println(F("*Check switches*"));
+            }
+
+            powerOff();
+            powerOn();
+            enableSpiPins();
+          } else {
+            println(F("Fuses are not saved"));
+          }
+          break;
+
+       case 'X':                                             // hard reset Fuse (HVP)
           {
             disableSpiPins();
             PumpFuseResetter resetter = PumpFuseResetter();
@@ -2054,7 +2132,7 @@ void debugger () {
               println(F("HVP reset failed!"));
               println(F("*Check switches*"));
             }
-              
+
             powerOff();
             powerOn();
             enableSpiPins();
@@ -2081,11 +2159,16 @@ void printMenu () {
   println(F(" 8 - Enable CKDIV8 (divide clock by 8)"));
   println(F(" 1 - Disable CKDIV8"));
   println(F(" B - Engage Debugger"));
-  println(F(" R - Reset Fuses (HVP)"));
+  println(F(" < - Save Current Fuses"));
+  println(F(" > - Restore Saved Fuses"));
+  println(F("High Voltage Programmer:"));
+  println(F(" R - Restore Saved Fuses (HVP)"));
+  println(F(" X - Hard Reset Fuses (HVP)"));
 #if 0
   println(F(" E - Erase Flash & EEPROM"));
 #endif
 #if DEVELOPER
+  println(F("Dev Commands:"));
   println(F(" C - Send 4 Byte ISP Command"));
   println(F(" P - Vcc On"));
   println(F(" O - Vcc Off"));

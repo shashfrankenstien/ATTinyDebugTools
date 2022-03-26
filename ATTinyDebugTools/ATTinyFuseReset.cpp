@@ -130,3 +130,38 @@ char PumpFuseResetter::reset()
   pump.turn_off();                // 12v Off
   return 0;
 }
+
+
+
+char PumpFuseResetter::restore(byte lowFuse, byte highFuse, byte extFuse)
+{
+  ChargePump pump = ChargePump(1);
+
+  pinMode(SDO, OUTPUT);     // Set SDO to output
+  digitalWrite(SDI, LOW);
+  digitalWrite(SII, LOW);
+  digitalWrite(SDO, LOW);
+  pump.turn_off();                // 12v Off
+  digitalWrite(VCC, HIGH);  // Vcc On
+  delayMicroseconds(20);
+  pump.turn_on();                // 12v On
+  delayMicroseconds(10);
+  pinMode(SDO, INPUT);      // Set SDO to input
+  delayMicroseconds(300);
+  unsigned int sig = readSignature();
+  Serial.print("Signature is: ");
+  Serial.println(sig, HEX);
+  if (sig == 0xFFFF)
+    return 1;
+  readFuses();
+
+  writeFuse(LFUSE, lowFuse);
+  writeFuse(HFUSE, highFuse);
+  writeFuse(EFUSE, extFuse);
+
+  readFuses();
+  digitalWrite(SCI, LOW);
+  digitalWrite(VCC, LOW);    // Vcc Off
+  pump.turn_off();                // 12v Off
+  return 0;
+}

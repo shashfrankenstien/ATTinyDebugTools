@@ -42,6 +42,7 @@ class PumpFuseResetter {
     ~PumpFuseResetter();
 
     char reset();
+    char PumpFuseResetter::restore(byte lowFuse, byte highFuse, byte extFuse);
 };
 
 

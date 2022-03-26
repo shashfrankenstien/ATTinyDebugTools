@@ -4,9 +4,9 @@
  *  depending upon baud rate.
 */
 
-// 
+//
 // Includes
-// 
+//
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <Arduino.h>
@@ -18,7 +18,7 @@
 // Statics
 //
 OnePinSerial *OnePinSerial::active_object = 0;
-uint8_t OnePinSerial::_receive_buffer[_SS_MAX_RX_BUFF]; 
+uint8_t OnePinSerial::_receive_buffer[_SS_MAX_RX_BUFF];
 volatile uint8_t OnePinSerial::_receive_buffer_tail = 0;
 volatile uint8_t OnePinSerial::_receive_buffer_head = 0;
 
@@ -26,8 +26,8 @@ volatile uint8_t OnePinSerial::_receive_buffer_head = 0;
 // Private methods
 //
 
-/* static */ 
-inline void OnePinSerial::tunedDelay(uint16_t delay) { 
+/* static */
+inline void OnePinSerial::tunedDelay(uint16_t delay) {
   _delay_loop_2(delay);
 }
 
@@ -49,7 +49,7 @@ void OnePinSerial::recv()
 
     // Wait approximately 1/2 of a bit width to "center" the sample in the start bit
     tunedDelay(_rx_delay_centering);
-    
+
     // Unroll read loop for more consistent timing at high baud rates
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
@@ -61,7 +61,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -72,7 +72,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -83,7 +83,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -94,7 +94,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -105,7 +105,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -116,7 +116,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -127,7 +127,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     tunedDelay(_rx_delay_intrabit);
     d >>= 1;
     if (rx_pin_read())
@@ -138,7 +138,7 @@ void OnePinSerial::recv()
     __asm__ __volatile__("nop\n\t": : :"memory");
     __asm__ __volatile__("nop\n\t": : :"memory");
 #endif
-    
+
     // if buffer full, set the overflow flag and return
     uint8_t next = (_receive_buffer_tail + 1) % _SS_MAX_RX_BUFF;
     if (next != _receive_buffer_head)
@@ -146,7 +146,7 @@ void OnePinSerial::recv()
       // save new data in buffer: tail points to where byte goes
       _receive_buffer[_receive_buffer_tail] = d; // save new byte
       _receive_buffer_tail = next;
-    } 
+    }
 
     // skip the stop bit
     tunedDelay(_rx_delay_stopbit);
@@ -197,7 +197,7 @@ ISR(PCINT3_vect, ISR_ALIASOF(PCINT0_vect));
 //
 // Constructor
 //
-OnePinSerial::OnePinSerial(uint8_t ioPin) : 
+OnePinSerial::OnePinSerial(uint8_t ioPin) :
   _rx_delay_centering(0),
   _rx_delay_intrabit(0),
   _rx_delay_stopbit(0),
@@ -209,7 +209,7 @@ OnePinSerial::OnePinSerial(uint8_t ioPin) :
   digitalWrite(ioPin, LOW);
   _transmitBitMask = digitalPinToBitMask(ioPin);
   _transmitPortRegister = portModeRegister(digitalPinToPort(ioPin));
-  
+
 	// Setup Rx
   _receiveBitMask = digitalPinToBitMask(ioPin);
   _receivePortRegister = portInputRegister(digitalPinToPort(ioPin));
@@ -253,7 +253,7 @@ void OnePinSerial::begin(long speed)
   // These are all close enough to just use 15 cycles, since the inter-bit
   // timings are the most critical (deviations stack 8 times)
   _tx_delay = subtract_cap(bit_delay, 15 / 4);
-    
+
 #if GCC_VERSION > 40800   // Arduino 1.8.5 is 40902
   // Timings counted from gcc 4.8.2 output. This works up to 115200 on
   // 16Mhz and 57600 on 8Mhz.
@@ -310,12 +310,12 @@ void OnePinSerial::begin(long speed)
   // can be used inside the ISR without costing too much time.
   _pcint_maskreg = digitalPinToPCMSK(_ioPin);
   _pcint_maskvalue = _BV(digitalPinToPCMSKbit(_ioPin));
-  
+
   // Masked used to clear a pending pin change interrupt
    _pcint_clrMask = _BV(digitalPinToPCICRbit(_ioPin));
 
   tunedDelay(_tx_delay); // if we were low this establishes the end
-    
+
   // Activate receive function
 	_receive_buffer_head = _receive_buffer_tail = 0;
 	setRxIntMsk(true);
@@ -362,7 +362,7 @@ void OnePinSerial::sendBreak()
     tunedDelay(delay);
   }
   *reg &= inv_mask;           // send 1 (DDR becomes input with pull up)
-  
+
   PCIFR |= clrMask;           // clear any outstanding pin change interrupt
   SREG = oldSREG;             // turn interrupts back on
 }
@@ -379,7 +379,7 @@ void OnePinSerial::sendCmd(uint8_t* loc, uint8_t len) {
       write(loc[ii]);
     }
   }
-} 
+}
 
 void OnePinSerial::write(uint8_t* loc, uint8_t len)
 {
@@ -393,17 +393,17 @@ void OnePinSerial::write(uint8_t* loc, uint8_t len)
   uint8_t clrMask = _pcint_clrMask;
   uint8_t oldSREG = SREG;
   uint16_t delay = _tx_delay;
-  
+
   cli();  // turn off interrupts for a clean txmit
-  
+
   for (byte ii = 0; ii < len; ii++) {
     uint8_t b = loc[ii];
-    
+
     // Write the start bit
     *reg |= reg_mask;       // send 0 (DDR becomes output)
-    
+
     tunedDelay(delay);
-    
+
     // Write each of the 8 bits
     for (uint8_t i = 8; i > 0; --i) {
       if (b & 1) {
@@ -421,7 +421,7 @@ void OnePinSerial::write(uint8_t* loc, uint8_t len)
       tunedDelay(delay);
     }
   }
-  
+
   PCIFR |= clrMask;           // clear any outstanding pin change interrupt
   SREG = oldSREG;             // turn interrupts back on
 }
@@ -461,7 +461,7 @@ void OnePinSerial::write(uint8_t b)
   // restore pin to natural state
   *reg &= inv_mask;           // send 1 (DDR becomes input with pull up)
 
- 
+
   PCIFR |= clrMask;           // clear any outstanding pin change interrupt
   SREG = oldSREG;             // turn interrupts back on
 

@@ -1,5 +1,5 @@
 /*
- *	OnePinSerial.h (based on SoftwareSerial.h, formerly NewSoftSerial.h) - 
+ *	OnePinSerial.h (based on SoftwareSerial.h, formerly NewSoftSerial.h) -
 */
 
 #ifndef OnePinSerial_h
@@ -19,7 +19,7 @@
 #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
-class OnePinSerial 
+class OnePinSerial
 {
 private:
   // per object data
@@ -40,7 +40,7 @@ private:
   uint16_t _tx_delay;
 
   // static data
-  static uint8_t _receive_buffer[_SS_MAX_RX_BUFF]; 
+  static uint8_t _receive_buffer[_SS_MAX_RX_BUFF];
   static volatile uint8_t _receive_buffer_tail;
   static volatile uint8_t _receive_buffer_head;
   static OnePinSerial *active_object;
@@ -69,7 +69,7 @@ public:
   virtual int read();
   virtual int available();
   operator bool() { return true; }
-  
+
   // public only for easy access by interrupt handlers
   static inline void handle_interrupt() __attribute__((__always_inline__));
 };
