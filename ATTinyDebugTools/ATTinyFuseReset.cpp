@@ -81,18 +81,7 @@ PumpFuseResetter::~PumpFuseResetter()
   pinMode(SDO, INPUT);
 }
 
-// void setup() {
-//   pinMode(VCC, OUTPUT);
-//   pinMode(SDI, OUTPUT);
-//   pinMode(SII, OUTPUT);
-//   pinMode(SCI, OUTPUT);
-//   pinMode(SDO, OUTPUT);     // Configured as input when in programming mode
-//   Serial.begin(57600);
-//   // Setup timer interrupt for  charge pump
-//   analogReference(DEFAULT);
-//   // Timer1.initialize(500);
-//   // Timer1.attachInterrupt(ticker);
-// }
+
 
 char PumpFuseResetter::reset()
 {
