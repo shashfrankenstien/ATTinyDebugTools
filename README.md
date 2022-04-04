@@ -29,3 +29,8 @@ Arduino ISP, debugwire and charge pump based HVP for ATTiny85
   P - Vcc On
   O - Vcc Off
 ```
+
+
+### Also included, serial oscilloscope
+
+- [arduino poor man's oscilloscope](https://randomnerdtutorials.com/arduino-poor-mans-oscilloscope/)
