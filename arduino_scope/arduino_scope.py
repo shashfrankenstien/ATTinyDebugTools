@@ -11,7 +11,7 @@ AMPLITUDE_MAX_VOLTAGE = 3.3 # volts
 GRID_RESOLUTION = 0.5 # volts
 GRID_RESOLUTION_PIXELS = GRID_RESOLUTION * AMPLITUDE_MAX / AMPLITUDE_MAX_VOLTAGE
 
-DEFAULT_SPEED_SCALING = 3
+DEFAULT_SPEED_SCALING = 2
 
 WINDOW_HEIGHT = 500
 WINDOW_WIDTH = 1400
@@ -83,7 +83,7 @@ class Stats(tk.Frame):
             if per / mvavg < 0.8 or per / mvavg > 1.2:
                 self.bug_count += 1
                 self.bugs.set(f"{self.bug_count} Bugs")
-                print(mvavg, per)
+                # print(mvavg, per)
 
 
 
