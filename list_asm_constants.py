@@ -137,7 +137,7 @@ def match_ldi(src, dis):
             out[new[0]] = new[1]
 
     # printing
-    name_size = 80
+    name_size = 40
     for k,v in sorted(out.items()):
         if len(k) > name_size:
             k = k[:name_size-2] + '..'
