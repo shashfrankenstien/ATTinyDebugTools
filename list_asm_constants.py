@@ -13,7 +13,7 @@ DISPATH = os.path.join(PROJPATH, 'build', 'kernel.dis')
 
 
 def src_parse_ldi(line):
-    line = line.replace('ldi', '')
+    line = line.replace('ldi', '').replace('cpi', '').replace('adiw', '')
     reg, val = line.split(',')
     val = val.strip()
 
@@ -33,7 +33,7 @@ def src_get_ldi():
                 if not l.startswith(' ') and not l.startswith(';') and not l.startswith('.') and l.strip():
                     label = l.split(";")[0].replace(":", "").strip()
                     out[label] = []
-                if l.strip().lower().startswith('ldi'):
+                if l.strip().lower()[:3] in ('ldi','cpi','adi'):
                     ldi = str(l.strip().split(';')[0]).strip()
                     out[label].append(src_parse_ldi(ldi))
 
@@ -47,12 +47,13 @@ def dis_get_ldi():
         label = None
         for l in dis.readlines():
             res_label = re.findall(r'^[0-9a-fA-F]+ \<(.+)\>', l)
-            res_ldi = re.findall(r'ldi\s(r\d+?), .+?;\s(.*)', l)
+            res_ldi = re.findall(r'(ldi|cpi|adiw)\s(r\d+?), .+?;\s(.*)', l)
             if res_label:
                 label = res_label[0]
                 out[label] = []
             elif res_ldi:
-                out[label].append(res_ldi[0])
+                # print(label, res_ldi)
+                out[label].append(res_ldi[0][1:])
 
     return out
 

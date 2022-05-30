@@ -18,25 +18,25 @@
 
 
 #include "MCP3008.h"
- 
+
 //define pin connections
 #define CLOCK_PIN 14
 #define MISO_PIN 12
 #define MOSI_PIN 13
 #define CS_PIN 15
 
- 
+
 MCP3008 adc(CLOCK_PIN, MOSI_PIN, MISO_PIN, CS_PIN);
- 
-void setup() 
+
+void setup()
 {
  // open serial port
-  Serial.begin(9600); 
+  Serial.begin(9600);
 }
- 
-void loop() 
+
+void loop()
 {
- 
+
   int val = adc.readADC(0); // read Channel 0 from MCP3008 ADC (pin 1)
   int val2 = adc.readADC(1); // read Channel 1 from MCP3008 ADC (pin 2)
 
