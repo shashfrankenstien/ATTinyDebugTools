@@ -11,6 +11,19 @@ Arduino ISP, debugwire and charge pump based HVP for ATTiny85
 - [attiny-fuse-reset-with-12-volt-charge-pump](https://sites.google.com/site/wayneholder/attiny-fuse-reset-with-12-volt-charge-pump)
 
 
+### Modified curcuit
+
+- see AttinyDebugTools.fzz Fritzing file
+
+<p align="center">
+  <img  src="imgs/AtTinyDebugTools_HW.jpg" height=500px>
+</p>
+
+
+### Usage
+
+Can be started from Arduino Serial window, or using `serial_debugger.py`
+
 ```
  Commands:
   F - Identify Device & Print Fuses
